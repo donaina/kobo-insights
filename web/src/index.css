@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-night-950 text-ink font-sans antialiased;
+  background-image:
+    radial-gradient(60rem 60rem at 85% -10%, rgba(212, 175, 106, 0.06), transparent 60%),
+    radial-gradient(50rem 50rem at -10% 10%, rgba(34, 48, 86, 0.25), transparent 55%);
+  background-attachment: fixed;
+}
+
+/* Thin champagne scrollbar to match the portfolio surface treatment. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.18);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 106, 0.4);
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-line-strong bg-night-800/70 backdrop-blur-sm;
+  }
+  .card-pad {
+    @apply p-5 sm:p-6;
+  }
+  .label {
+    @apply text-xs uppercase tracking-[0.14em] text-ink-3 font-medium;
+  }
+  .stat {
+    @apply font-mono tabular-nums;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line-strong px-2.5 py-1 text-xs font-medium;
+  }
+}

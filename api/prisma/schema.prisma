@@ -1,0 +1,55 @@
+// Prisma schema for the kobo-insights API.
+// All monetary values are stored as integer KOBO (1 naira = 100 kobo) — there
+// is no floating-point money anywhere in the pipeline.
+// SQLite keeps the whole thing clone-and-run with zero external services.
+
+generator client {
+  provider      = "prisma-client-js"
+  // "native" for local dev; the musl+openssl3 target is what the Alpine
+  // Docker image resolves at runtime (see Dockerfile / docker-compose).
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// A bank statement: a labelled batch of transactions for one account/period.
+model Statement {
+  id             String   @id @default(uuid())
+  label          String
+  source         String   @default("UPLOAD") // SAMPLE | UPLOAD
+  bankHint       String? // e.g. "GTBank", "Access" — best-effort, display only
+  accountName    String?
+  periodStart    DateTime?
+  periodEnd      DateTime?
+  openingBalance Int? // kobo
+  closingBalance Int? // kobo
+  createdAt      DateTime @default(now())
+
+  transactions Transaction[]
+}
+
+/// One line on a statement. `amount` is always positive kobo; the sign lives
+/// in `direction`. Category fields are filled by the categorization pass.
+model Transaction {
+  id           String   @id @default(uuid())
+  statementId  String
+  statement    Statement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+  postedAt     DateTime
+  direction    String // DEBIT | CREDIT
+  amount       Int // kobo, always positive
+  narration    String
+  balanceAfter Int? // kobo, running balance if the source provided one
+
+  category           String? // one of the fixed taxonomy keys
+  merchant           String?
+  categoryConfidence Float?
+  categorizedBy      String? // RULES | AI
+
+  createdAt DateTime @default(now())
+
+  @@index([statementId])
+  @@index([category])
+}

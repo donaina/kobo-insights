@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - DATABASE_URL=file:/data/dev.db
+      - AI_ENABLED=${AI_ENABLED:-false}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - KOBO_CATEGORIZE_MODEL=${KOBO_CATEGORIZE_MODEL:-claude-haiku-4-5}
+      - KOBO_ASK_MODEL=${KOBO_ASK_MODEL:-claude-sonnet-5}
+      - MAX_UPLOAD_ROWS=${MAX_UPLOAD_ROWS:-5000}
+    volumes:
+      - kobo-api-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3001/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      - VITE_API_BASE=http://localhost:3001
+
+volumes:
+  kobo-api-data:
