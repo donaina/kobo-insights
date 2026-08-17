@@ -21,8 +21,8 @@ RUN npm run build
 FROM node:20-slim AS runner
 WORKDIR /app
 
-# Install OpenSSL for Prisma query engine
-RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
+# Install OpenSSL for Prisma query engine + curl for healthcheck
+RUN apt-get update && apt-get install -y --no-install-recommends openssl curl && rm -rf /var/lib/apt/lists/*
 
 # Non-root user
 RUN addgroup --gid 1001 --system nodejs && adduser --uid 1001 --system --ingroup nodejs nestjs
