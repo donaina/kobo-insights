@@ -21,6 +21,9 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
+# Install OpenSSL 1.1 compat for Prisma query engine
+RUN apk add --no-cache openssl1.1-compat
+
 # Non-root user
 RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001 -G nodejs
 
