@@ -18,7 +18,7 @@ services:
     volumes:
       - kobo-api-data:/data
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3001/api/health"]
+      test: ["CMD", "sh", "-c", "curl -fs http://localhost:3001/api/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
