@@ -1,9 +1,9 @@
 # ---------- Builder ----------
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 WORKDIR /app
 
 # Install build deps
-RUN apk add --no-cache python3 make g++
+RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*
 
 # Copy package files & install
 COPY package*.json ./
@@ -18,14 +18,11 @@ COPY . .
 RUN npm run build
 
 # ---------- Runner ----------
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 
-# Install OpenSSL 1.1 compat for Prisma query engine
-RUN apk add --no-cache openssl1.1-compat
-
 # Non-root user
-RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001 -G nodejs
+RUN addgroup --gid 1001 --system nodejs && adduser --uid 1001 --system --ingroup nodejs nestjs
 
 # Copy built assets + prisma + node_modules
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
